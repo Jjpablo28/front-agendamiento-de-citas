@@ -1,18 +1,14 @@
-/* Variables de diseño (para mantener consistencia) */
-$breakpoint-mobile: 480px;
-$breakpoint-tablet: 768px;
-$breakpoint-desktop: 1024px;
-
 .home-container {
-  max-width: 1200px; // Un poco más amplio para pantallas grandes
+  width: 100%;
+  max-width: 1000px;
   margin: 1.5rem auto;
-  padding: 0 1rem; // Padding más ajustado en móviles
+  padding: 0 1rem; // Un padding más moderado que no robe espacio en móviles
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   box-sizing: border-box;
 
-  @media (min-width: $breakpoint-tablet) {
-    margin: 3rem auto;
-    padding: 0 2rem;
+  @media (min-width: 768px) {
+    margin: 2rem auto;
+    padding: 0 1.5rem;
   }
 }
 
@@ -20,18 +16,18 @@ $breakpoint-desktop: 1024px;
   text-align: center;
   margin-bottom: 2rem;
 
-  @media (min-width: $breakpoint-tablet) {
-    margin-bottom: 3.5rem;
+  @media (min-width: 768px) {
+    margin-bottom: 3rem;
   }
 
   h1 {
     color: #0f172a;
-    font-size: 1.8rem; // Escalamiento de fuentes (Mobile-first)
+    font-size: 1.75rem; // Mobile first
     margin: 0 0 0.5rem 0;
     line-height: 1.2;
 
-    @media (min-width: $breakpoint-tablet) {
-      font-size: 2.75rem;
+    @media (min-width: 768px) {
+      font-size: 2.5rem;
     }
   }
 
@@ -40,8 +36,8 @@ $breakpoint-desktop: 1024px;
     font-size: 1rem;
     margin: 0;
 
-    @media (min-width: $breakpoint-tablet) {
-      font-size: 1.25rem;
+    @media (min-width: 768px) {
+      font-size: 1.1rem;
     }
   }
 }
@@ -49,14 +45,15 @@ $breakpoint-desktop: 1024px;
 /* Rejilla de Indicadores (Stats) */
 .stats-grid {
   display: grid;
-  // minmax cambiado a 200px para que quepan dos columnas en móviles medianos si es necesario
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  // minmax bajó a 180px para garantizar la compresión fluida en pantallas pequeñas
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
 
-  @media (min-width: $breakpoint-tablet) {
+  @media (min-width: 768px) {
     gap: 1.5rem;
-    margin-bottom: 4rem;
+    margin-bottom: 3rem;
   }
 }
 
@@ -65,21 +62,18 @@ $breakpoint-desktop: 1024px;
   padding: 1.25rem;
   border-radius: 8px;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   border-top: 4px solid #2563eb;
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: translateY(-2px); // Sutil feedback visual
-  }
+  box-sizing: border-box;
 
   h3 {
     font-size: 1.8rem;
     margin: 0 0 0.25rem 0;
     color: #1e293b;
 
-    @media (min-width: $breakpoint-tablet) {
-      font-size: 2.5rem;
+    @media (min-width: 768px) {
+      font-size: 2.25rem;
+      margin: 0 0 0.5rem 0;
     }
   }
 
@@ -89,8 +83,8 @@ $breakpoint-desktop: 1024px;
     font-weight: 500;
     font-size: 0.85rem;
 
-    @media (min-width: $breakpoint-tablet) {
-      font-size: 0.95rem;
+    @media (min-width: 768px) {
+      font-size: 1rem;
     }
   }
 }
@@ -98,26 +92,46 @@ $breakpoint-desktop: 1024px;
 /* Rejilla de Accesos Directos (Módulos) */
 .modules-grid {
   display: grid;
-  // SOLUCIÓN: Bajamos el mínimo a 280px para que nunca rompa pantallas de celulares viejos o pequeños
+  // Cambiado de 400px estrictos a un mínimo responsivo de 280px
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
+  width: 100%;
+}
 
-  @media (min-width: $breakpoint-tablet) {
-    gap: 2.5rem;
+// Conservamos tu media-query de control estructural absoluto
+@media (max-width: 850px) {
+  .modules-grid {
+    grid-template-columns: 1fr;
   }
 }
 
 .module-card {
   background: #ffffff;
-  padding: 1.5rem; // Padding amigable con celulares
+  padding: 1.5rem; // Padding amigable con smartphones
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   border: 1px solid #e2e8f0;
+  box-sizing: border-box;
 
-  @media (min-width: $breakpoint-tablet) {
+  @media (min-width: 768px) {
     padding: 2.5rem;
+  }
+
+  p {
+    color: #475569;
+    line-height: 1.5;
+    margin: 0 0 1.5rem 0;
+    flex-grow: 1;
+    font-size: 0.9rem;
+    word-break: break-word; // 💡 Seguridad total: rompe cadenas de texto si se desbordan
+
+    @media (min-width: 768px) {
+      line-height: 1.6;
+      margin: 0 0 2rem 0;
+      font-size: 1rem;
+    }
   }
 }
 
@@ -125,38 +139,26 @@ $breakpoint-desktop: 1024px;
   font-size: 2.2rem;
   margin-bottom: 0.75rem;
 
-  @media (min-width: $breakpoint-tablet) {
-    font-size: 2.8rem;
+  @media (min-width: 768px) {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
   }
 }
 
 .module-card h2 {
   margin: 0 0 0.75rem 0;
   color: #1e293b;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
 
-  @media (min-width: $breakpoint-tablet) {
-    font-size: 1.6rem;
-  }
-}
-
-.module-card p {
-  color: #475569;
-  line-height: 1.5;
-  margin: 0 0 1.5rem 0;
-  flex-grow: 1;
-  font-size: 0.9rem;
-
-  @media (min-width: $breakpoint-tablet) {
-    font-size: 1rem;
-    line-height: 1.6;
-    margin: 0 0 2rem 0;
+  @media (min-width: 768px) {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
   }
 }
 
 .btn-module {
-  width: 100%; // Botón ocupa todo el ancho en móviles para facilitar el toque táctil
-  padding: 0.85rem 1.5rem; // Área de toque aumentada según guías de accesibilidad móvil
+  width: 100%; // Botón completo en pantallas móviles para facilitar el touch
+  padding: 0.8rem 1.5rem;
   border: none;
   border-radius: 6px;
   font-size: 1rem;
@@ -166,31 +168,26 @@ $breakpoint-desktop: 1024px;
   text-align: center;
   box-sizing: border-box;
 
-  @media (min-width: $breakpoint-mobile) {
-    width: auto; // El botón recupera su tamaño original en pantallas más anchas
-    align-self: flex-start; // Lo alinea a la izquierda dentro del flex-container
+  @media (min-width: 480px) {
+    width: auto; // Recupera su tamaño natural en PCs o tablets
+    align-self: flex-start;
   }
 }
 
-/* ESTILOS DE BOTONES */
-.relational {
-  .btn-module {
-    background-color: #2563eb;
-    color: #ffffff;
+.relational .btn-module {
+  background-color: #2563eb;
+  color: #ffffff;
 
-    &:hover {
-      background-color: #1d4ed8;
-    }
+  &:hover {
+    background-color: #1d4ed8;
   }
 }
 
-.document {
-  .btn-module {
-    background-color: #10b981;
-    color: #ffffff;
+.document .btn-module {
+  background-color: #10b981;
+  color: #ffffff;
 
-    &:hover {
-      background-color: #059669;
-    }
+  &:hover {
+    background-color: #059669;
   }
 }

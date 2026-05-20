@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+/* Forzar a que los paddings no sumen ancho extra a las pantallas */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Blindaje anti-desborde horizontal en toda la aplicación */
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: #f8fafc;
+}

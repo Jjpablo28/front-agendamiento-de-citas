@@ -8,8 +8,14 @@ $border-color: #e2e8f0;
   color: $color-text-muted;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 0.85rem;
-  padding: 1rem 2rem;
-  margin-top: auto; // Si usas Flexbox en el layout general, esto empuja el footer abajo
+  padding: 1rem;
+  margin-top: auto;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (min-width: 768px) {
+    padding: 1rem 2rem;
+  }
 
   .footer-container {
     max-width: 1400px;
@@ -18,7 +24,9 @@ $border-color: #e2e8f0;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 1.25rem;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   p {
@@ -31,7 +39,8 @@ $border-color: #e2e8f0;
     list-style: none;
     margin: 0;
     padding: 0;
-    gap: 1.5rem;
+    gap: 1.25rem;
+    flex-wrap: wrap;
 
     li {
       a {
@@ -40,7 +49,7 @@ $border-color: #e2e8f0;
         transition: color 0.2s ease;
 
         &:hover {
-          color: #0284c7; // Color primary
+          color: #0284c7;
         }
       }
     }
@@ -70,9 +79,31 @@ $border-color: #e2e8f0;
         display: inline-block;
         width: 8px;
         height: 8px;
-        background-color: #22c55e; // Verde indicador "online"
+        background-color: #22c55e;
         border-radius: 50%;
       }
+    }
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE PARA EL FOOTER
+   ========================================================================== */
+@media (max-width: 768px) {
+  .clinic-footer {
+    .footer-container {
+      flex-direction: column; // Pasa a comportamiento vertical
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .footer-links {
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .footer-right {
+      justify-content: center;
     }
   }
 }
