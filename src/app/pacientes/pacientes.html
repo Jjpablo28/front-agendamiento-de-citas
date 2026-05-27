@@ -1,1 +1,132 @@
-<p>pacientes works!</p>
+<div class="page-container">
+
+  <header class="page-header">
+    <div>
+      <h1>👥 Gestión de Pacientes</h1>
+      <p class="subtitle">Administra los pacientes registrados en el sistema</p>
+    </div>
+    <button class="btn-primary" (click)="abrirModalCrear()">+ Nuevo Paciente</button>
+  </header>
+
+  <!-- Alertas globales -->
+  <div class="alert alert-success" *ngIf="exito">✅ {{ exito }}</div>
+  <div class="alert alert-error" *ngIf="error">⚠️ {{ error }}</div>
+
+  <!-- Búsqueda por documento -->
+  <div class="search-bar">
+    <input
+      type="text"
+      [(ngModel)]="busquedaDocumento"
+      placeholder="Buscar por número de documento..."
+      (keyup.enter)="buscarPorDocumento()"
+    />
+    <button class="btn-secondary" (click)="buscarPorDocumento()">Buscar</button>
+    <button class="btn-ghost" *ngIf="pacienteBuscado || errorBusqueda" (click)="limpiarBusqueda()">✕ Limpiar</button>
+  </div>
+
+  <div class="alert alert-error" *ngIf="errorBusqueda">⚠️ {{ errorBusqueda }}</div>
+
+  <!-- Resultado de búsqueda individual -->
+  <div class="result-card" *ngIf="pacienteBuscado">
+    <h3>Resultado de búsqueda</h3>
+    <div class="patient-info-grid">
+      <div><strong>ID:</strong> {{ pacienteBuscado.id_paciente }}</div>
+      <div><strong>Documento:</strong> {{ pacienteBuscado.documento }}</div>
+      <div><strong>Nombre:</strong> {{ pacienteBuscado.nombres }} {{ pacienteBuscado.apellidos }}</div>
+      <div><strong>Email:</strong> {{ pacienteBuscado.email }}</div>
+    </div>
+    <div class="result-actions">
+      <button class="btn-secondary btn-sm" (click)="abrirModalEditar(pacienteBuscado)">✏️ Editar</button>
+      <button class="btn-danger btn-sm" (click)="confirmarEliminar(pacienteBuscado.id_paciente!)">🗑️ Eliminar</button>
+    </div>
+  </div>
+
+  <!-- Tabla de pacientes -->
+  <div class="table-wrapper">
+    <div class="table-loader" *ngIf="cargando">Cargando pacientes...</div>
+
+    <table class="data-table" *ngIf="!cargando && pacientes.length > 0">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Documento</th>
+        <th>Nombres</th>
+        <th>Apellidos</th>
+        <th>Email</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let p of pacientes">
+        <td>{{ p.id_paciente }}</td>
+        <td>{{ p.documento }}</td>
+        <td>{{ p.nombres }}</td>
+        <td>{{ p.apellidos }}</td>
+        <td>{{ p.email }}</td>
+        <td class="actions-cell">
+          <button class="btn-icon edit" (click)="abrirModalEditar(p)" title="Editar">✏️</button>
+          <button class="btn-icon delete" (click)="confirmarEliminar(p.id_paciente!)" title="Eliminar">🗑️</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="!cargando && pacientes.length === 0">
+      <p>No hay pacientes registrados aún.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal crear / editar -->
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h2>{{ modoEdicion ? '✏️ Editar Paciente' : '➕ Nuevo Paciente' }}</h2>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Documento *</label>
+        <input type="text" [(ngModel)]="pacienteSeleccionado.documento" placeholder="Número de documento" />
+      </div>
+      <div class="form-group" *ngIf="!modoEdicion">
+        <label>Contraseña *</label>
+        <input type="password" [(ngModel)]="pacienteSeleccionado.password" placeholder="Contraseña de acceso" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombres *</label>
+        <input type="text" [(ngModel)]="pacienteSeleccionado.nombres" placeholder="Nombres completos" />
+      </div>
+      <div class="form-group">
+        <label>Apellidos *</label>
+        <input type="text" [(ngModel)]="pacienteSeleccionado.apellidos" placeholder="Apellidos completos" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email *</label>
+      <input type="email" [(ngModel)]="pacienteSeleccionado.email" placeholder="correo@ejemplo.com" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardar()" [disabled]="cargando">
+        {{ cargando ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Crear Paciente') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmación eliminar -->
+<div class="modal-overlay" *ngIf="confirmandoEliminar !== null">
+  <div class="modal-card modal-confirm">
+    <h2>⚠️ Confirmar eliminación</h2>
+    <p>¿Estás seguro de que deseas eliminar este paciente? Esta acción no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cancelarEliminar()">Cancelar</button>
+      <button class="btn-danger" (click)="eliminar(confirmandoEliminar!)">Sí, eliminar</button>
+    </div>
+  </div>
+</div>

@@ -1,136 +1,172 @@
-<div class="portal-clinico animate-fade-in">
+<div class="page-container">
 
-    <section class="search-bar-section">
-        <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <input type="number" [(ngModel)]="filtroPacienteId" (input)="ejecutarConsulta()"
-                placeholder="Ingrese el número de documento o ID del paciente para consultar..."
-                class="main-search-input" />
-            <select [(ngModel)]="consultaSeleccionada" (change)="ejecutarConsulta()" class="filter-dropdown">
-                <option value="todos">📋 Mostrar Todos los Expedientes</option>
-                <option value="filtro_paciente">🆔 Filtrar por Documento Único</option>
-                <option value="signos_criticos">⚠️ Alertas de Frecuencia Cardíaca (>90 lpm)</option>
-            </select>
+  <header class="page-header">
+    <div>
+      <h1>📋 Historias Clínicas</h1>
+      <p class="subtitle">Consulta y registra expedientes clínicos (MongoDB)</p>
+    </div>
+    <button class="btn-primary" (click)="abrirModalCrear()">+ Nueva Historia</button>
+  </header>
+
+  <div class="alert alert-success" *ngIf="exito">✅ {{ exito }}</div>
+  <div class="alert alert-error" *ngIf="error">⚠️ {{ error }}</div>
+
+  <!-- Búsqueda por paciente -->
+  <div class="search-bar">
+    <input
+      type="number"
+      [(ngModel)]="idPacienteBusqueda"
+      placeholder="ID del paciente (PostgreSQL)..."
+      (keyup.enter)="buscar()"
+    />
+    <button class="btn-secondary" (click)="buscar()">Buscar Historias</button>
+  </div>
+
+  <div class="table-loader" *ngIf="cargando">Cargando historias clínicas...</div>
+
+  <!-- Tarjetas de historias clínicas -->
+  <div class="historias-grid" *ngIf="!cargando && historias.length > 0">
+    <div class="historia-card" *ngFor="let h of historias">
+      <div class="historia-header">
+        <span class="historia-id">ID Mongo: {{ h._id?.slice(-6) | uppercase }}</span>
+        <span class="historia-fecha">{{ h.fecha_registro | date:'dd/MM/yyyy' }}</span>
+      </div>
+
+      <div class="historia-body">
+        <div class="info-row">
+          <span class="info-label">Médico tratante</span>
+          <span>{{ h.medico_tratante }}</span>
         </div>
-    </section>
+        <div class="info-row">
+          <span class="info-label">Motivo de consulta</span>
+          <span>{{ h.motivo_consulta }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Diagnóstico</span>
+          <span>{{ h.diagnostico }}</span>
+        </div>
 
-    <div *ngIf="historiasFiltradas.length === 0" class="welcome-clinical-card">
-        <div class="welcome-icon">🏥</div>
-        <h3>Visor de Expedientes Médicos Unificado</h3>
-        <p>Por favor, ingrese un criterio de búsqueda o cambie el filtro superior para recuperar la información del
-            agendamiento y la evolución clínica del paciente.</p>
+        <div class="signos-grid" *ngIf="h.signos_vitales">
+          <div class="signo" *ngIf="h.signos_vitales.presion">
+            <span class="signo-icon">❤️</span>
+            <span class="signo-label">Presión</span>
+            <span class="signo-val">{{ h.signos_vitales.presion }}</span>
+          </div>
+          <div class="signo" *ngIf="h.signos_vitales.ritmo_cardiaco">
+            <span class="signo-icon">💓</span>
+            <span class="signo-label">F. Cardiaca</span>
+            <span class="signo-val">{{ h.signos_vitales.ritmo_cardiaco }} bpm</span>
+          </div>
+          <div class="signo" *ngIf="h.signos_vitales.temperatura">
+            <span class="signo-icon">🌡️</span>
+            <span class="signo-label">Temp.</span>
+            <span class="signo-val">{{ h.signos_vitales.temperatura }}°C</span>
+          </div>
+        </div>
+
+        <div class="receta-list" *ngIf="(h.receta_medica ?? []).length > 0">
+          <span class="info-label">💊 Receta médica</span>
+          <ul>
+            <li *ngFor="let r of (h.receta_medica ?? [])">{{ r }}</li>
+          </ul>
+        </div>
+
+        <div class="info-row" *ngIf="h.incapacidad_dias">
+          <span class="info-label">🏥 Incapacidad</span>
+          <span>{{ h.incapacidad_dias }} días</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!cargando && historias.length === 0 && idPacienteBusqueda">
+    <p>No se encontraron historias clínicas para el paciente #{{ idPacienteBusqueda }}.</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!idPacienteBusqueda && historias.length === 0">
+    <p>Ingresa el ID de un paciente para consultar sus historias clínicas.</p>
+  </div>
+
+</div>
+
+<!-- Modal nueva historia clínica -->
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()">
+  <div class="modal-card modal-large" (click)="$event.stopPropagation()">
+    <h2>📋 Nueva Historia Clínica</h2>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>ID Paciente (SQL) *</label>
+        <input type="number" [(ngModel)]="nueva.id_paciente_sql" placeholder="Ej: 5" />
+      </div>
+      <div class="form-group">
+        <label>ID Cita (SQL) *</label>
+        <input type="number" [(ngModel)]="nueva.id_cita_sql" placeholder="Ej: 12" />
+      </div>
     </div>
 
-    <div *ngIf="historiasFiltradas.length > 0" class="dashboard-grid">
-
-        <aside class="patient-sidebar animate-slide-in">
-            <div class="sidebar-profile-header">
-                <div class="avatar-circle">👤</div>
-                <div class="profile-title">
-                    <h4>Expediente General</h4>
-                    <span class="status-pill active">Paciente Activo</span>
-                </div>
-            </div>
-
-            <div class="sidebar-info-list">
-                <div class="info-item-row">
-                    <span class="info-label">ID Sistema:</span>
-                    <span class="info-value">#{{ historiasFiltradas[0].id_paciente_sql }}</span>
-                </div>
-                <div class="info-item-row">
-                    <span class="info-label">Contacto Emergencia:</span>
-                    <span class="info-value">Carlos Gómez (Padre)</span>
-                </div>
-                <div class="info-item-row">
-                    <span class="info-label">Teléfono:</span>
-                    <span class="info-value">3004005060</span>
-                </div>
-                <div class="info-item-row alert-row">
-                    <span class="info-label">Alergias Detectadas:</span>
-                    <span class="info-value">Penicilina, Aspirina</span>
-                </div>
-            </div>
-
-            <div class="sidebar-footer-note">
-                <p>ℹ️ Datos demográficos e integridad de identidad validados mediante el núcleo relacional del sistema.
-                </p>
-            </div>
-        </aside>
-
-        <main class="timeline-column">
-            <div class="column-header">
-                <h3>Evolución y Registro de Consultas Asociadas</h3>
-                <span class="counter-badge">{{ historiasFiltradas.length }} Registros encontrados</span>
-            </div>
-
-            <div class="clinical-timeline">
-                <div class="timeline-card" *ngFor="let doc of historiasFiltradas">
-
-                    <div class="timeline-badge-connector"></div>
-
-                    <div class="card-clinical-header">
-                        <div class="doctor-info">
-                            <span class="doc-avatar">👨‍⚕️</span>
-                            <div>
-                                <h5>{{ doc.medico_tratante || 'Médico de Turno' }}</h5>
-                                <span class="appointment-date">{{ doc.fecha_registro | date:'longDate' }} — {{
-                                    doc.fecha_registro | date:'shortTime' }}</span>
-                            </div>
-                        </div>
-                        <div class="appointment-tags">
-                            <span class="tag-id-sql">Cita Nº {{ doc.id_cita_sql || 'N/A' }}</span>
-                        </div>
-                    </div>
-
-                    <div class="card-clinical-body">
-                        <div class="clinical-data-group">
-                            <label>Motivo del Agendamiento</label>
-                            <p class="motivo-text">{{ doc.motivo_consulta }}</p>
-                        </div>
-
-                        <div class="vitals-panel-real" *ngIf="doc.signos_vitales">
-                            <div class="vital-tile">
-                                <span class="vital-icon-real">🫁</span>
-                                <div class="vital-desc">
-                                    <span class="v-label">Presión Arterial</span>
-                                    <span class="v-value">{{ doc.signos_vitales.presion }} <small>mmHg</small></span>
-                                </div>
-                            </div>
-                            <div class="vital-tile" [class.danger-vital]="doc.signos_vitales.ritmo_cardiaco > 90">
-                                <span class="vital-icon-real pulsate">❤️</span>
-                                <div class="vital-desc">
-                                    <span class="v-label">Frecuencia Cardíaca</span>
-                                    <span class="v-value">{{ doc.signos_vitales.ritmo_cardiaco }}
-                                        <small>lpm</small></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="clinical-data-group" *ngIf="doc.notas_evolucion">
-                            <label>Notas de Evolución Médica</label>
-                            <p class="evolucion-text">{{ doc.notas_evolucion }}</p>
-                        </div>
-
-                        <div class="diagnosis-box-real" *ngIf="doc.diagnostico_codigo">
-                            <span class="diag-icon">📋</span>
-                            <p><strong>Diagnóstico Principal Codificado (CIE-10):</strong> <u>{{ doc.diagnostico_codigo
-                                    }}</u></p>
-                        </div>
-
-                        <div class="attachments-container-real"
-                            *ngIf="doc.archivos_adjuntos && doc.archivos_adjuntos[0] !== 'Ninguno'">
-                            <label>Documentos Adjuntos al Expediente</label>
-                            <div class="attachment-files-list">
-                                <a class="file-download-link" *ngFor="let file of doc.archivos_adjuntos">
-                                    <span class="clip-icon">📎</span> {{ file }}
-                                </a>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </main>
-
+    <div class="form-row">
+      <div class="form-group">
+        <label>Médico Tratante *</label>
+        <input type="text" [(ngModel)]="nueva.medico_tratante" placeholder="Nombre del médico" />
+      </div>
+      <div class="form-group">
+        <label>Fecha de Registro *</label>
+        <input type="date" [(ngModel)]="nueva.fecha_registro" />
+      </div>
     </div>
+
+    <div class="form-group">
+      <label>Motivo de Consulta *</label>
+      <textarea [(ngModel)]="nueva.motivo_consulta" placeholder="Describe el motivo de consulta..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Diagnóstico *</label>
+      <textarea [(ngModel)]="nueva.diagnostico" placeholder="Diagnóstico médico..."></textarea>
+    </div>
+
+    <fieldset class="fieldset-signos">
+      <legend>🩺 Signos Vitales</legend>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Presión arterial</label>
+          <input type="text" [(ngModel)]="nueva.signos_vitales.presion" placeholder="120/80" />
+        </div>
+        <div class="form-group">
+          <label>Frec. cardiaca (bpm)</label>
+          <input type="number" [(ngModel)]="nueva.signos_vitales.ritmo_cardiaco" placeholder="70" />
+        </div>
+        <div class="form-group">
+          <label>Temperatura (°C)</label>
+          <input type="number" [(ngModel)]="nueva.signos_vitales.temperatura" placeholder="36.5" />
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="form-group">
+      <label>💊 Agregar a la receta</label>
+      <div class="receta-input-wrap">
+        <input type="text" [(ngModel)]="recetaInput" placeholder="Ej: Ibuprofeno 400mg cada 8h" (keyup.enter)="agregarReceta()" />
+        <button class="btn-secondary btn-sm" (click)="agregarReceta()">Agregar</button>
+      </div>
+      <div class="receta-chips" *ngIf="nueva.receta_medica.length > 0">
+        <span class="chip" *ngFor="let r of nueva.receta_medica; let i = index">
+          {{ r }} <button (click)="quitarReceta(i)">✕</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>🏥 Días de incapacidad (opcional)</label>
+      <input type="number" [(ngModel)]="nueva.incapacidad_dias" placeholder="0" min="0" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardar()" [disabled]="cargando">
+        {{ cargando ? 'Guardando...' : 'Crear Historia Clínica' }}
+      </button>
+    </div>
+  </div>
 </div>

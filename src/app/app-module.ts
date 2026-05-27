@@ -14,6 +14,9 @@ import { Footer } from './core/footer/footer';
 import { Header } from './core/header/header';
 import { Login } from './login/login';
 import { Register } from './register/register';
+import { Dashboard } from './dashboard/dashboard';
+import { MedicosComponent } from './medicos-component/medicos-component';
+import { Citas } from './citas/citas';
 
 @NgModule({
   declarations: [
@@ -26,8 +29,17 @@ import { Register } from './register/register';
     Header,
     Login,
     Register,
+    Dashboard,
+    MedicosComponent,
+    Citas,
   ],
-  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, FormsModule, CommonModule],
+  imports: [
+    BrowserModule,
+    CommonModule, // Activa pipes nativas como | date
+    FormsModule, // Activa [(ngModel)]
+    ReactiveFormsModule, // Activa [formGroup]
+    AppRoutingModule, // 💡 DEJA SOLO ESTE. Él ya contiene la configuración de las URL
+  ],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })

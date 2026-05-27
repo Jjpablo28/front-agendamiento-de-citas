@@ -1,21 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-
-
-interface HistoriaClinica {
-  _id: string;
-  id_paciente_sql: number;
-  id_cita_sql: number; // <-- NUEVO: El puente directo con el agendamiento
-  fecha_registro: string;
-  medico_tratante: string;
-  motivo_consulta: string;
-  signos_vitales: {
-    presion: string;
-    ritmo_cardiaco: number;
-  };
-  notas_evolucion: string;
-  archivos_adjuntos?: string[];
-  diagnostico_codigo?: string; // Campo variable para demostrar esquema flexible
-}
+import { Component } from '@angular/core';
+import { HistoriasClinicasService, HistoriaClinica } from '../service/historias-clinicas.service';
 
 @Component({
   selector: 'app-historias-clinicas',
@@ -23,86 +7,91 @@ interface HistoriaClinica {
   templateUrl: './historias-clinicas.html',
   styleUrls: ['./historias-clinicas.scss']
 })
-export class HistoriasClinicasComponent implements OnInit {
-  // Colección principal con datos de prueba (Simulación de 50-100 docs en MongoDB)
-  historiasCompletas: HistoriaClinica[] = [
-    {
-      _id: '65dfa112b3c4d5e6f7000001',
-      id_paciente_sql: 101,
-      id_cita_sql: 5001, // <-- La cita programada en Postgres
-      fecha_registro: '2026-05-15T11:00:00Z',
-      medico_tratante: 'Dr. Diego Bonza',
-      motivo_consulta: 'Dolor torácico agudo',
-      signos_vitales: { presion: '120/80', ritmo_cardiaco: 75 },
-      notas_evolucion: 'Paciente estable, se recomienda electrocardiograma de control urgente.',
-      archivos_adjuntos: ['radiografia_torax.png', 'electrocardiograma.pdf']
-    },
-    {
-      _id: '65dfa223c4d5e6f7a8000002',
-      id_paciente_sql: 102,
-      id_cita_sql: 5001, // <-- La cita programada en Postgres
-      fecha_registro: '2026-05-16T09:30:00Z',
-      medico_tratante: 'Dr. Juan Camilo Beltrán',
-      motivo_consulta: 'Control de hipertensión',
-      signos_vitales: { presion: '145/95', ritmo_cardiaco: 94 },
-      notas_evolucion: 'Se evidencia presión arterial elevada. Se realiza ajuste en la dosis de los medicamentos.',
-      diagnostico_codigo: 'I10 - Hipertensión esencial' // Esquema flexible (no todos lo tienen)
-    },
-    {
-      _id: '65dfa334d5e6f7a8b9000003',
-      id_paciente_sql: 101,
-      id_cita_sql: 5001, // <-- La cita programada en Postgres
-      fecha_registro: '2026-05-18T14:15:00Z',
-      medico_tratante: 'Dr. Diego Bonza',
-      motivo_consulta: 'Revisión de exámenes',
-      signos_vitales: { presion: '118/75', ritmo_cardiaco: 68 },
-      notas_evolucion: 'Resultados de radiografía normales. Paciente evoluciona favorablemente sin dolor.',
-      archivos_adjuntos: ['laboratorio_sangre.pdf']
-    }
-  ];
+export class HistoriasClinicasComponent {
 
-  historiasFiltradas: any[] = [];
-  consultaSeleccionada: string = 'todos';
-  filtroPacienteId: number | null = null;
+  idPacienteBusqueda: number | null = null;
+  historias: HistoriaClinica[] = [];
+  cargando = false;
+  error = '';
+  exito = '';
 
-  ngOnInit() {
-    this.ejecutarConsulta();
+  // Modal nueva historia
+  modalAbierto = false;
+  recetaInput = '';
+  nueva: HistoriaClinica = this.formularioVacio();
+
+  constructor(private historiasService: HistoriasClinicasService) {}
+
+  formularioVacio(): HistoriaClinica {
+    return {
+      id_paciente_sql: 0,
+      id_cita_sql: 0,
+      fecha_registro: new Date().toISOString().slice(0, 10),
+      medico_tratante: '',
+      signos_vitales: { presion: '', ritmo_cardiaco: 0, temperatura: 0 },
+      motivo_consulta: '',
+      diagnostico: '',
+      receta_medica: [],
+      archivos_adjuntos: [],
+      incapacidad_dias: undefined
+    };
   }
 
-  ejecutarConsulta() {
-    switch (this.consultaSeleccionada) {
-      case 'todos':
-        // Muestra los documentos completos
-        this.historiasFiltradas = JSON.parse(JSON.stringify(this.historiasCompletas));
-        break;
+  buscar(): void {
+    if (!this.idPacienteBusqueda) return;
+    this.cargando = true;
+    this.error = '';
+    this.historias = [];
 
-      case 'filtro_paciente':
-        // Consulta 1: Filtro por llave de referencia cruzada con PostgreSQL (id_paciente_sql)
-        if (this.filtroPacienteId) {
-          this.historiasFiltradas = this.historiasCompletas.filter(
-            h => h.id_paciente_sql === this.filtroPacienteId
-          );
-        } else {
-          this.historiasFiltradas = [];
-        }
-        break;
+    this.historiasService.listarPorPaciente(this.idPacienteBusqueda).subscribe({
+      next: (data) => { this.historias = data; this.cargando = false; },
+      error: () => { this.error = 'No se encontraron historias para ese paciente.'; this.cargando = false; }
+    });
+  }
 
-      case 'signos_criticos':
-        // Consulta 2: Filtro/Agregación por subdocumento interno (Ritmo cardiaco elevado > 90)
-        this.historiasFiltradas = this.historiasCompletas.filter(
-          h => h.signos_vitales.ritmo_cardiaco > 90
-        );
-        break;
+  abrirModalCrear(): void {
+    this.nueva = this.formularioVacio();
+    this.recetaInput = '';
+    this.modalAbierto = true;
+    this.error = '';
+    this.exito = '';
+  }
 
-      case 'proyeccion_archivos':
-        // Consulta 3: Proyección (Muestra únicamente _id, fecha, paciente y el arreglo de archivos_adjuntos)
-        this.historiasFiltradas = this.historiasCompletas.map(h => ({
-          _id: h._id,
-          id_paciente_sql: h.id_paciente_sql,
-          fecha_registro: h.fecha_registro,
-          archivos_adjuntos: h.archivos_adjuntos || ['Ninguno']
-        }));
-        break;
+  cerrarModal(): void {
+    this.modalAbierto = false;
+  }
+
+  agregarReceta(): void {
+    const item = this.recetaInput.trim();
+    if (item) {
+      this.nueva.receta_medica.push(item);
+      this.recetaInput = '';
     }
+  }
+
+  quitarReceta(i: number): void {
+    this.nueva.receta_medica.splice(i, 1);
+  }
+
+  guardar(): void {
+    const { id_paciente_sql, id_cita_sql, medico_tratante, motivo_consulta, diagnostico, fecha_registro } = this.nueva;
+    if (!id_paciente_sql || !id_cita_sql || !medico_tratante || !motivo_consulta || !diagnostico || !fecha_registro) {
+      this.error = 'Todos los campos obligatorios deben completarse.';
+      return;
+    }
+
+    this.cargando = true;
+    this.historiasService.crear(this.nueva).subscribe({
+      next: () => {
+        this.exito = 'Historia clínica creada exitosamente en MongoDB.';
+        this.cerrarModal();
+        if (this.idPacienteBusqueda) this.buscar();
+        else this.cargando = false;
+      },
+      error: (err) => {
+        this.cargando = false;
+        this.error = err?.error?.detail || 'Error al crear la historia clínica.';
+      }
+    });
   }
 }

@@ -1,15 +1,18 @@
-<header class="clinic-header">
+<header class="clinic-header" *ngIf="estaLogueado">
   <div class="header-container">
+
+    <!-- Logo -->
     <div class="logo-area">
       <span class="icon-plus">🩺</span>
       <h1>MediGestion</h1>
     </div>
 
+    <!-- Navegación desktop -->
     <nav class="main-nav">
       <ul>
         <li>
-          <a routerLink="/dashboard" routerLinkActive="active">
-            <span class="nav-icon">📊</span> Dashboard
+          <a routerLink="/home" routerLinkActive="active">
+            <span class="nav-icon">🏠</span> Inicio
           </a>
         </li>
         <li>
@@ -23,6 +26,11 @@
           </a>
         </li>
         <li>
+          <a routerLink="/medicos" routerLinkActive="active">
+            <span class="nav-icon">🩺</span> Médicos
+          </a>
+        </li>
+        <li>
           <a routerLink="/historias-clinicas" routerLinkActive="active">
             <span class="nav-icon">📋</span> Historias Clínicas
           </a>
@@ -30,12 +38,42 @@
       </ul>
     </nav>
 
+    <!-- Perfil de usuario dinámico -->
     <div class="user-profile">
       <div class="user-info">
-        <span class="user-name">Dr. Alejandro Ríos</span>
-        <span class="user-role">Médico General</span>
+        <span class="user-name">{{ nombreUsuario }}</span>
+        <span class="user-role">{{ rolUsuario }}</span>
       </div>
-      <div class="user-avatar">AR</div>
+      <!-- Avatar con iniciales generadas dinámicamente -->
+      <div class="user-avatar">{{ iniciales }}</div>
+
+      <!-- Botón cerrar sesión -->
+      <button class="btn-logout" (click)="cerrarSesion()" title="Cerrar sesión">
+        <span>⏻</span>
+      </button>
     </div>
+
+    <!-- Botón hamburguesa para móvil -->
+    <button class="btn-hamburger" (click)="toggleMenu()" [class.open]="menuAbierto">
+      <span></span><span></span><span></span>
+    </button>
+
   </div>
+
+  <!-- Menú desplegable en móvil -->
+  <nav class="mobile-nav" [class.open]="menuAbierto" (click)="menuAbierto = false">
+    <ul>
+      <li><a routerLink="/home"              routerLinkActive="active"><span>🏠</span> Inicio</a></li>
+      <li><a routerLink="/citas"             routerLinkActive="active"><span>📅</span> Citas</a></li>
+      <li><a routerLink="/pacientes"         routerLinkActive="active"><span>👥</span> Pacientes</a></li>
+      <li><a routerLink="/medicos"           routerLinkActive="active"><span>🩺</span> Médicos</a></li>
+      <li><a routerLink="/historias-clinicas" routerLinkActive="active"><span>📋</span> Historias Clínicas</a></li>
+      <li>
+        <a (click)="cerrarSesion()" style="cursor:pointer">
+          <span>⏻</span> Cerrar Sesión
+        </a>
+      </li>
+    </ul>
+  </nav>
+
 </header>

@@ -1,0 +1,110 @@
+<div class="page-container">
+
+  <header class="page-header">
+    <div>
+      <h1>🩺 Gestión de Médicos</h1>
+      <p class="subtitle">Registra y administra los médicos del sistema</p>
+    </div>
+    <button class="btn-primary" (click)="abrirModalCrear()">+ Nuevo Médico</button>
+  </header>
+
+  <div class="alert alert-success" *ngIf="exito">✅ {{ exito }}</div>
+  <div class="alert alert-error" *ngIf="error">⚠️ {{ error }}</div>
+
+  <!-- Búsqueda -->
+  <div class="search-bar">
+    <input
+      type="text"
+      [(ngModel)]="busquedaDocumento"
+      placeholder="Buscar médico por documento..."
+      (keyup.enter)="buscarPorDocumento()"
+    />
+    <button class="btn-secondary" (click)="buscarPorDocumento()">Buscar</button>
+    <button class="btn-ghost" *ngIf="medicoBuscado || errorBusqueda" (click)="limpiarBusqueda()">✕ Limpiar</button>
+  </div>
+
+  <div class="alert alert-error" *ngIf="errorBusqueda">⚠️ {{ errorBusqueda }}</div>
+
+  <div class="result-card" *ngIf="medicoBuscado">
+    <h3>Resultado de búsqueda</h3>
+    <div class="patient-info-grid">
+      <div><strong>ID:</strong> {{ medicoBuscado.id_medico }}</div>
+      <div><strong>Documento:</strong> {{ medicoBuscado.documento }}</div>
+      <div><strong>Nombre:</strong> {{ medicoBuscado.nombre_completo }}</div>
+      <div><strong>Especialidad ID:</strong> {{ medicoBuscado.id_especialidad }}</div>
+    </div>
+    <div class="result-actions">
+      <button class="btn-secondary btn-sm" (click)="abrirModalEditar(medicoBuscado)">✏️ Editar</button>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-wrapper">
+    <div class="table-loader" *ngIf="cargando">Cargando médicos...</div>
+
+    <table class="data-table" *ngIf="!cargando && medicos.length > 0">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Documento</th>
+        <th>Nombre Completo</th>
+        <th>ID Especialidad</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let m of medicos">
+        <td>{{ m.id_medico }}</td>
+        <td>{{ m.documento }}</td>
+        <td>{{ m.nombre_completo }}</td>
+        <td>
+          <span class="badge badge-confirmed">ESP-{{ m.id_especialidad }}</span>
+        </td>
+        <td class="actions-cell">
+          <button class="btn-icon edit" (click)="abrirModalEditar(m)" title="Editar">✏️</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="!cargando && medicos.length === 0">
+      <p>No hay médicos registrados aún.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal crear / editar -->
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h2>{{ modoEdicion ? '✏️ Editar Médico' : '➕ Nuevo Médico' }}</h2>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Documento *</label>
+        <input type="text" [(ngModel)]="medicoSeleccionado.documento" placeholder="Número de documento" />
+      </div>
+      <div class="form-group" *ngIf="!modoEdicion">
+        <label>Contraseña *</label>
+        <input type="password" [(ngModel)]="medicoSeleccionado.password" placeholder="Contraseña de acceso" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Nombre Completo *</label>
+      <input type="text" [(ngModel)]="medicoSeleccionado.nombre_completo" placeholder="Ej: Dr. Juan Pérez Rodríguez" />
+    </div>
+
+    <div class="form-group">
+      <label>ID Especialidad *</label>
+      <input type="number" [(ngModel)]="medicoSeleccionado.id_especialidad" placeholder="Ej: 1" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardar()" [disabled]="cargando">
+        {{ cargando ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Crear Médico') }}
+      </button>
+    </div>
+  </div>
+</div>

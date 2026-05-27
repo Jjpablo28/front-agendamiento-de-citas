@@ -4,12 +4,23 @@ import {HomeComponent} from './home/home.component';
 import {AgendamientoCitasComponent} from './agendamiento-citas/agendamiento-citas';
 import {Pacientes} from './pacientes/pacientes';
 import {HistoriasClinicasComponent} from './historias-clinicas/historias-clinicas';
+import {Login} from "./login/login";
+import {Register} from "./register/register";
+import {Dashboard} from "./dashboard/dashboard";
+import {MedicosComponent} from "./medicos-component/medicos-component";
+import {Citas} from "./citas/citas";
 
 const routes: Routes = [
-  {path: '', component: HomeComponent},
-  {path:'agendamiento', component:AgendamientoCitasComponent},
-  {path:'paciente',component:Pacientes},
-  {path:'historia-clinica',component:HistoriasClinicasComponent}
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  {path: 'home', component: HomeComponent},
+  {path: 'dashboard', component: Dashboard},
+  {path:'citasq', component:AgendamientoCitasComponent},
+  {path:'citas', component:Citas},
+  {path:'pacientes',component:Pacientes},
+  {path:'medicos',component:MedicosComponent},
+  {path:'historias-clinicas',component:HistoriasClinicasComponent},
+  {path:'login', component:Login},
+  {path:'register', component:Register},
 
 ];
 

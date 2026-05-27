@@ -1,0 +1,137 @@
+<div class="page-container">
+
+  <header class="page-header">
+    <div>
+      <h1>📅 Agendamiento de Citas</h1>
+      <p class="subtitle">Registra y gestiona las citas médicas del sistema</p>
+    </div>
+    <button class="btn-primary" (click)="abrirModalCrear()">+ Nueva Cita</button>
+  </header>
+
+  <div class="alert alert-success" *ngIf="exito">✅ {{ exito }}</div>
+  <div class="alert alert-error" *ngIf="error">⚠️ {{ error }}</div>
+
+  <div class="table-wrapper">
+    <div class="table-loader" *ngIf="cargando">Cargando citas...</div>
+
+    <table class="data-table" *ngIf="!cargando && citas.length > 0">
+      <thead>
+      <tr>
+        <th>ID Cita</th>
+        <th>ID Paciente</th>
+        <th>ID Médico</th>
+        <th>Fecha y Hora</th>
+        <th>Consultorio</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let c of citas">
+        <td>#{{ c.id_cita }}</td>
+        <td>{{ c.id_paciente }}</td>
+        <td>{{ c.id_medico }}</td>
+        <td>{{ c.fecha_hora | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ c.consultorio || '—' }}</td>
+        <td>
+            <span class="badge" [ngClass]="getBadgeClass(c.id_estado)">
+              {{ getNombreEstado(c.id_estado) }}
+            </span>
+        </td>
+        <td class="actions-cell">
+          <button class="btn-icon edit" (click)="abrirModalEstado(c)" title="Cambiar Estado">🔄</button>
+          <button
+            class="btn-icon done"
+            *ngIf="c.id_estado !== 4"
+            (click)="confirmarFinalizar(c.id_cita!)"
+            title="Finalizar y crear historia clínica"
+          >✅</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="!cargando && citas.length === 0">
+      <p>No hay citas registradas aún.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal nueva cita -->
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h2>📅 Agendar Nueva Cita</h2>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>ID Paciente *</label>
+        <input type="number" [(ngModel)]="citaSeleccionada.id_paciente" placeholder="Ej: 5" />
+      </div>
+      <div class="form-group">
+        <label>ID Médico *</label>
+        <input type="number" [(ngModel)]="citaSeleccionada.id_medico" placeholder="Ej: 2" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Fecha y Hora *</label>
+        <input type="datetime-local" [(ngModel)]="citaSeleccionada.fecha_hora" />
+      </div>
+      <div class="form-group">
+        <label>ID Estado *</label>
+        <select [(ngModel)]="citaSeleccionada.id_estado">
+          <option [value]="1">1 - Pendiente</option>
+          <option [value]="2">2 - Confirmada</option>
+          <option [value]="3">3 - Cancelada</option>
+          <option [value]="4">4 - Finalizada</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Consultorio</label>
+      <input type="text" [(ngModel)]="citaSeleccionada.consultorio" placeholder="Ej: Consultorio 3B" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardar()" [disabled]="cargando">
+        {{ cargando ? 'Agendando...' : 'Agendar Cita' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal cambio de estado -->
+<div class="modal-overlay" *ngIf="modalEstado" (click)="cerrarModalEstado()">
+  <div class="modal-card modal-confirm" (click)="$event.stopPropagation()">
+    <h2>🔄 Cambiar Estado de Cita #{{ idCitaEstado }}</h2>
+    <div class="form-group" style="margin-top: 1rem;">
+      <label>Nuevo Estado</label>
+      <select [(ngModel)]="nuevoEstado">
+        <option [value]="1">1 - Pendiente</option>
+        <option [value]="2">2 - Confirmada</option>
+        <option [value]="3">3 - Cancelada</option>
+        <option [value]="4">4 - Finalizada</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cerrarModalEstado()">Cancelar</button>
+      <button class="btn-primary" (click)="cambiarEstado()">Actualizar Estado</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmar finalizar -->
+<div class="modal-overlay" *ngIf="confirmandoFinalizar !== null">
+  <div class="modal-card modal-confirm">
+    <h2>✅ Finalizar Cita #{{ confirmandoFinalizar }}</h2>
+    <p>Esto actualizará la cita y creará automáticamente un expediente clínico en MongoDB. ¿Confirmas?</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cancelarFinalizar()">Cancelar</button>
+      <button class="btn-primary" (click)="finalizarCita(confirmandoFinalizar!)">Sí, finalizar</button>
+    </div>
+  </div>
+</div>

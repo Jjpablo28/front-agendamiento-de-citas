@@ -1,1 +1,54 @@
-<p>register works!</p>
+<div class="login-page">
+  <div class="login-card">
+
+    <div class="login-brand">
+      <span class="brand-icon">🩺</span>
+      <h1>MediGestion</h1>
+      <p class="brand-sub">Registro de Nuevo Paciente</p>
+    </div>
+
+    <div class="alert alert-error" *ngIf="error">
+      <span>⚠️</span> {{ error }}
+    </div>
+
+    <div class="alert alert-success" *ngIf="exito">
+      {{ exito }}
+    </div>
+
+    <div class="form-group">
+      <label>Documento de Identidad</label>
+      <input type="text" [(ngModel)]="form.documento" placeholder="Ej: 1002345678" [disabled]="cargando" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombres</label>
+        <input type="text" [(ngModel)]="form.nombres" placeholder="Ej: Carlos" [disabled]="cargando" />
+      </div>
+      <div class="form-group">
+        <label>Apellidos</label>
+        <input type="text" [(ngModel)]="form.apellidos" placeholder="Ej: Pérez" [disabled]="cargando" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Correo Electrónico</label>
+      <input type="email" [(ngModel)]="form.email" placeholder="correo@ejemplo.com" [disabled]="cargando" />
+    </div>
+
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" [(ngModel)]="form.password" placeholder="Mínimo 8 caracteres" [disabled]="cargando" />
+    </div>
+
+    <button class="btn-login" (click)="registrar()" [disabled]="cargando">
+      <span *ngIf="!cargando">Crear Cuenta</span>
+      <span *ngIf="cargando">⏳ Registrando...</span>
+    </button>
+
+    <p class="login-footer">
+      ¿Ya tienes cuenta? <a routerLink="/login">Iniciar sesión</a>
+    </p>
+
+  </div>
+</div>
