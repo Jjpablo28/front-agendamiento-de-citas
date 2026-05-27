@@ -64,10 +64,10 @@
           </div>
         </div>
 
-        <div class="receta-list" *ngIf="(h.receta_medica ?? []).length > 0">
+        <div class="receta-list" *ngIf="h.receta_medica.length > 0">
           <span class="info-label">💊 Receta médica</span>
           <ul>
-            <li *ngFor="let r of (h.receta_medica ?? [])">{{ r }}</li>
+            <li *ngFor="let r of h.receta_medica">{{ r }}</li>
           </ul>
         </div>
 

@@ -31,7 +31,7 @@
       <div><strong>ID:</strong> {{ medicoBuscado.id_medico }}</div>
       <div><strong>Documento:</strong> {{ medicoBuscado.documento }}</div>
       <div><strong>Nombre:</strong> {{ medicoBuscado.nombre_completo }}</div>
-      <div><strong>Especialidad ID:</strong> {{ medicoBuscado.id_especialidad }}</div>
+      <div><strong>Especialidad:</strong> {{ getNombreEspecialidad(medicoBuscado.id_especialidad) }}</div>
     </div>
     <div class="result-actions">
       <button class="btn-secondary btn-sm" (click)="abrirModalEditar(medicoBuscado)">✏️ Editar</button>
@@ -48,7 +48,7 @@
         <th>ID</th>
         <th>Documento</th>
         <th>Nombre Completo</th>
-        <th>ID Especialidad</th>
+        <th>Especialidad</th>
         <th>Acciones</th>
       </tr>
       </thead>
@@ -58,7 +58,7 @@
         <td>{{ m.documento }}</td>
         <td>{{ m.nombre_completo }}</td>
         <td>
-          <span class="badge badge-confirmed">ESP-{{ m.id_especialidad }}</span>
+          <span class="badge badge-confirmed">{{ getNombreEspecialidad(m.id_especialidad) }}</span>
         </td>
         <td class="actions-cell">
           <button class="btn-icon edit" (click)="abrirModalEditar(m)" title="Editar">✏️</button>
@@ -96,8 +96,13 @@
     </div>
 
     <div class="form-group">
-      <label>ID Especialidad *</label>
-      <input type="number" [(ngModel)]="medicoSeleccionado.id_especialidad" placeholder="Ej: 1" />
+      <label>Especialidad *</label>
+      <select [(ngModel)]="medicoSeleccionado.id_especialidad">
+        <option [ngValue]="0" disabled>— Selecciona una especialidad —</option>
+        <option *ngFor="let esp of especialidades" [ngValue]="esp.id_especialidad">
+          {{ esp.nombre_specialidad }}
+        </option>
+      </select>
     </div>
 
     <div class="modal-actions">

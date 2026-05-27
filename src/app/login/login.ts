@@ -33,7 +33,7 @@ export class Login {
           this.cargando = false;
           // Redirigir según el rol
           if (res.rol === 'medico') {
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/citas']);
           } else {
             this.router.navigate(['/home']);
           }

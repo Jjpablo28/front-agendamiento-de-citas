@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MedicosService, Medico, MedicoCreate } from '../service/medicos.service';
+import { EspecialidadesService, Especialidad } from '../service/especialidades.service';
 
 @Component({
   selector: 'app-medicos',
@@ -10,6 +11,7 @@ import { MedicosService, Medico, MedicoCreate } from '../service/medicos.service
 export class MedicosComponent implements OnInit {
 
   medicos: Medico[] = [];
+  especialidades: Especialidad[] = [];
   cargando = false;
   error = '';
   exito = '';
@@ -22,10 +24,14 @@ export class MedicosComponent implements OnInit {
   modoEdicion = false;
   medicoSeleccionado: MedicoCreate & { id_medico?: number } = this.formularioVacio();
 
-  constructor(private medicosService: MedicosService) {}
+  constructor(
+    private medicosService: MedicosService,
+    private especialidadesService: EspecialidadesService
+  ) {}
 
   ngOnInit(): void {
     this.cargarMedicos();
+    this.cargarEspecialidades();
   }
 
   formularioVacio(): MedicoCreate & { id_medico?: number } {
@@ -38,6 +44,19 @@ export class MedicosComponent implements OnInit {
       next: (data) => { this.medicos = data; this.cargando = false; },
       error: () => { this.error = 'Error al cargar los médicos.'; this.cargando = false; }
     });
+  }
+
+  cargarEspecialidades(): void {
+    this.especialidadesService.listar().subscribe({
+      next: (data) => this.especialidades = data,
+      error: () => this.especialidades = []
+    });
+  }
+
+  // Helper para obtener el nombre de la especialidad dado su ID
+  getNombreEspecialidad(id: number): string {
+    const esp = this.especialidades.find(e => e.id_especialidad === id);
+    return esp ? esp.nombre_specialidad : `ESP-${id}`;
   }
 
   buscarPorDocumento(): void {
