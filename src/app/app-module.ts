@@ -14,7 +14,6 @@ import { Footer } from './core/footer/footer';
 import { Header } from './core/header/header';
 import { Login } from './login/login';
 import { Register } from './register/register';
-import { Dashboard } from './dashboard/dashboard';
 import { MedicosComponent } from './medicos-component/medicos-component';
 import { Citas } from './citas/citas';
 
@@ -29,7 +28,6 @@ import { Citas } from './citas/citas';
     Header,
     Login,
     Register,
-    Dashboard,
     MedicosComponent,
     Citas,
   ],

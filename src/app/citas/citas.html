@@ -128,7 +128,7 @@
 <div class="modal-overlay" *ngIf="confirmandoFinalizar !== null">
   <div class="modal-card modal-confirm">
     <h2>✅ Finalizar Cita #{{ confirmandoFinalizar }}</h2>
-    <p>Esto actualizará la cita y creará automáticamente un expediente clínico en MongoDB. ¿Confirmas?</p>
+    <p>Esto actualizará la cita y creará automáticamente un expediente clínico. ¿Confirmas?</p>
     <div class="modal-actions">
       <button class="btn-ghost" (click)="cancelarFinalizar()">Cancelar</button>
       <button class="btn-primary" (click)="finalizarCita(confirmandoFinalizar!)">Sí, finalizar</button>
